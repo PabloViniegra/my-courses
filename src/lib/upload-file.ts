@@ -47,20 +47,42 @@ export async function uploadAvatarServiceRole(
   userId: string
 ): Promise<string | null> {
   try {
+    console.log("uploadAvatarServiceRole: Starting upload for userId:", userId);
+    
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error("Missing environment variables in upload function");
+      throw new Error("Missing Supabase configuration");
+    }
+
     const supabaseServiceRole = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
+    
+    console.log("uploadAvatarServiceRole: Supabase client created");
+    
     const fileExt = file.name.split(".").pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
     const filePath = fileName;
 
-    const { error } = await supabaseServiceRole.storage
+    console.log("uploadAvatarServiceRole: File details:", {
+      originalName: file.name,
+      extension: fileExt,
+      generatedFileName: fileName,
+      fileSize: file.size,
+      fileType: file.type
+    });
+
+    console.log("uploadAvatarServiceRole: Attempting upload to avatars bucket...");
+
+    const { data, error } = await supabaseServiceRole.storage
       .from("avatars")
       .upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
       });
+
+    console.log("uploadAvatarServiceRole: Upload response:", { data, error });
 
     if (error) {
       console.error("Error uploading avatar with service role:", error);
@@ -69,12 +91,32 @@ export async function uploadAvatarServiceRole(
           'Avatar storage not configured. Please create the "avatars" bucket in your Supabase project Storage section.'
         );
       }
-      throw new Error(`Failed to upload avatar: ${error.message}`);
+      if (error.message.includes("The resource already exists")) {
+        console.log("File already exists, trying with upsert...");
+        const { data: upsertData, error: upsertError } = await supabaseServiceRole.storage
+          .from("avatars")
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: true,
+          });
+        
+        if (upsertError) {
+          console.error("Upsert also failed:", upsertError);
+          throw new Error(`Failed to upload avatar: ${upsertError.message}`);
+        }
+        console.log("Upsert successful:", upsertData);
+      } else {
+        throw new Error(`Failed to upload avatar: ${error.message}`);
+      }
     }
+
+    console.log("uploadAvatarServiceRole: Getting public URL for path:", filePath);
 
     const {
       data: { publicUrl },
     } = supabaseServiceRole.storage.from("avatars").getPublicUrl(filePath);
+
+    console.log("uploadAvatarServiceRole: Generated public URL:", publicUrl);
 
     return publicUrl;
   } catch (error) {

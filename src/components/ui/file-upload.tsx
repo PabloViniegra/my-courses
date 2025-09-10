@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 const ROOT_NAME = "FileUpload";
 const DROPZONE_NAME = "FileUploadDropzone";
@@ -1092,7 +1091,7 @@ function FileUploadItemPreview(props: FileUploadItemPreviewProps) {
 
         return (
           // biome-ignore lint/performance/noImgElement: dynamic file URLs from user uploads don't work well with Next.js Image optimization
-          <Image src={url} alt={file.name} className="size-full object-cover" />
+          <img src={url} alt={file.name} className="size-full object-cover" />
         );
       }
 
