@@ -28,13 +28,18 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CoursePublic } from "@/types";
+import { CourseActionsMenu } from "./course-actions-menu";
+import { CoursePublic, User as UserType } from "@/types";
 
 interface CourseDetailClientProps {
   course: CoursePublic;
+  currentUser: UserType | null;
 }
 
-export function CourseDetailClient({ course }: CourseDetailClientProps) {
+export function CourseDetailClient({
+  course,
+  currentUser,
+}: CourseDetailClientProps) {
   const [selectedTab, setSelectedTab] = useState("overview");
 
   const formatDuration = (minutes: number) => {
@@ -97,9 +102,7 @@ export function CourseDetailClient({ course }: CourseDetailClientProps) {
       </Breadcrumb>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Hero section */}
           <div className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -117,9 +120,14 @@ export function CourseDetailClient({ course }: CourseDetailClientProps) {
                 )}
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-extrabold text-foreground font-sans tracking-tight leading-tight">
-                {course.title}
-              </h1>
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="text-3xl md:text-4xl font-extrabold text-foreground font-sans tracking-tight leading-tight flex-1">
+                  {course.title}
+                </h1>
+
+                {/* Course Actions Menu - Only visible to ADMIN or course instructor */}
+                <CourseActionsMenu course={course} currentUser={currentUser} />
+              </div>
 
               {course.shortDesc && (
                 <p className="text-lg text-muted-foreground font-serif leading-relaxed">
@@ -180,8 +188,6 @@ export function CourseDetailClient({ course }: CourseDetailClientProps) {
                 )}
               </div>
             </div>
-
-            {/* Video preview */}
             <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden">
               {course.thumbnail ? (
                 <Image
@@ -210,7 +216,6 @@ export function CourseDetailClient({ course }: CourseDetailClientProps) {
             </div>
           </div>
 
-          {/* Course content tabs */}
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
             <TabsList className="grid w-full grid-cols-3 font-sans tracking-tight leading-relaxed">
               <TabsTrigger value="overview">Descripción</TabsTrigger>
@@ -258,7 +263,12 @@ export function CourseDetailClient({ course }: CourseDetailClientProps) {
                                   Lección {lesson.order}: {lesson.title}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                  {lesson.videoUrl ? 'Video' : 'Contenido'} • {lesson.duration ? formatDuration(Math.ceil(lesson.duration / 60)) : 'Duración por determinar'}
+                                  {lesson.videoUrl ? "Video" : "Contenido"} •{" "}
+                                  {lesson.duration
+                                    ? formatDuration(
+                                        Math.ceil(lesson.duration / 60)
+                                      )
+                                    : "Duración por determinar"}
                                 </p>
                                 {lesson.description && (
                                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -301,11 +311,17 @@ export function CourseDetailClient({ course }: CourseDetailClientProps) {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      <span>{course.instructor.role === "TEACHER" ? "Instructor" : course.instructor.role}</span>
+                      <span>
+                        {course.instructor.role === "TEACHER"
+                          ? "Instructor"
+                          : course.instructor.role}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>Miembro desde {formatDate(course.instructor.createdAt)}</span>
+                      <span>
+                        Miembro desde {formatDate(course.instructor.createdAt)}
+                      </span>
                     </div>
                   </div>
                 </div>

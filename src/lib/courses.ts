@@ -301,7 +301,6 @@ export async function getCourseBySlug(
       `
       )
       .eq("slug", slug)
-      .eq("status", "PUBLISHED")
       .single();
 
     if (courseError || !course) {
@@ -391,18 +390,19 @@ export async function getCourseBySlug(
             course_count: 0,
           }
         : null,
-      lessons: lessons.data?.map(lesson => ({
-        id: lesson.id,
-        title: lesson.title,
-        description: lesson.description,
-        videoUrl: lesson.videoUrl,
-        duration: lesson.duration,
-        order: lesson.order,
-        isPublished: lesson.isPublished,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        courseId: lesson.courseId || course.id,
-      })) || [],
+      lessons:
+        lessons.data?.map((lesson) => ({
+          id: lesson.id,
+          title: lesson.title,
+          description: lesson.description,
+          videoUrl: lesson.videoUrl,
+          duration: lesson.duration,
+          order: lesson.order,
+          isPublished: lesson.isPublished,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          courseId: course.id,
+        })) || [],
       _count: {
         lessons: lessons.data?.length || 0,
         enrollments: enrollments.count || 0,
@@ -418,7 +418,15 @@ export async function getCategories(): Promise<
   Array<{
     id: string;
     name: string;
-    subcategories: Array<{ id: string; name: string }>;
+    slug: string;
+    description: string | null;
+    image: string | null;
+    subcategories: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      course_count: number;
+    }>;
   }>
 > {
   try {
@@ -430,7 +438,10 @@ export async function getCategories(): Promise<
         `
         id,
         name,
-        subcategories:subcategories(id, name)
+        slug,
+        description,
+        image,
+        subcategories:subcategories(id, name, slug)
       `
       )
       .order("name");
@@ -440,7 +451,18 @@ export async function getCategories(): Promise<
       return [];
     }
 
-    return categories || [];
+    return (
+      categories?.map((category) => ({
+        ...category,
+        subcategories:
+          category.subcategories?.map(
+            (sub: { id: string; name: string; slug: string }) => ({
+              ...sub,
+              course_count: 0,
+            })
+          ) || [],
+      })) || []
+    );
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
