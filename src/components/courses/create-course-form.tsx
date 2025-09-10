@@ -484,8 +484,8 @@ export function CreateCourseForm({ categories }: CreateCourseFormProps) {
                 </div>
 
                 <div className="text-xs text-muted-foreground font-mono">
-                  * Choose "Save as Draft" to create privately, or "Save &
-                  Publish" to make it live immediately
+                  * Choose &quot;Save as Draft&quot; to create privately, or &quot;Save &amp;
+                  Publish&quot; to make it live immediately
                 </div>
               </CardContent>
             </Card>

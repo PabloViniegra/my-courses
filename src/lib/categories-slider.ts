@@ -29,8 +29,15 @@ export async function getCategoriesForSlider(): Promise<Category[]> {
       console.error("Error fetching subcategories:", subcategoriesError);
     }
 
+    interface SubcategoryRow {
+      id: string;
+      name: string;
+      slug: string;
+      categoryId: string;
+    }
+
     const subcategoriesWithCounts = await Promise.all(
-      (subcategoriesData || []).map(async (sub: any) => {
+      (subcategoriesData || []).map(async (sub: SubcategoryRow) => {
         const { count } = await supabase
           .from("courses")
           .select("*", { count: "exact", head: true })
@@ -47,14 +54,22 @@ export async function getCategoriesForSlider(): Promise<Category[]> {
       })
     );
 
-    const categoriesWithSubcategories = categories.map((category: any) => ({
+    interface CategoryRow {
+      id: string;
+      name: string;
+      slug: string;
+      description: string | null;
+      image: string | null;
+    }
+
+    const categoriesWithSubcategories = categories.map((category: CategoryRow) => ({
       id: category.id,
       name: category.name,
       slug: category.slug,
       description: category.description,
       image: category.image,
       subcategories: subcategoriesWithCounts.filter(
-        (sub: any) => sub.categoryId === category.id
+        (sub) => sub.categoryId === category.id
       ),
     }));
 

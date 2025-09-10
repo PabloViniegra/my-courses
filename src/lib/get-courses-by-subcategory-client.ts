@@ -15,13 +15,17 @@ export interface CourseBasic {
   };
 }
 
-export async function getCoursesBySubcategoryClient(subcategoryId: string, limit: number = 5): Promise<CourseBasic[]> {
+export async function getCoursesBySubcategoryClient(
+  subcategoryId: string,
+  limit: number = 5
+): Promise<CourseBasic[]> {
   try {
     const supabase = createClient();
-    
+
     const { data: courses, error } = await supabase
       .from("courses")
-      .select(`
+      .select(
+        `
         id,
         title,
         slug,
@@ -34,9 +38,10 @@ export async function getCoursesBySubcategoryClient(subcategoryId: string, limit
           name,
           avatar
         )
-      `)
+      `
+      )
       .eq("subcategoryId", subcategoryId)
-      .eq("status", "PUBLISHED") // Only show published courses
+      .eq("status", "PUBLISHED")
       .order("createdAt", { ascending: false })
       .limit(limit);
 
@@ -45,7 +50,22 @@ export async function getCoursesBySubcategoryClient(subcategoryId: string, limit
       return [];
     }
 
-    return courses as CourseBasic[];
+    const transformedCourses: CourseBasic[] =
+      courses?.map((course) => ({
+        id: course.id,
+        title: course.title,
+        slug: course.slug,
+        shortDesc: course.shortDesc,
+        price: course.price,
+        thumbnail: course.thumbnail,
+        level: course.level,
+        status: course.status,
+        instructor: Array.isArray(course.instructor)
+          ? course.instructor[0]
+          : course.instructor,
+      })) || [];
+
+    return transformedCourses;
   } catch (error) {
     console.error("Error in getCoursesBySubcategoryClient:", error);
     return [];

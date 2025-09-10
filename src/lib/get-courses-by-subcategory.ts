@@ -45,7 +45,20 @@ export async function getCoursesBySubcategory(subcategoryId: string, limit: numb
       return [];
     }
 
-    return courses as CourseBasic[];
+    // Transform the data to match CourseBasic interface
+    const transformedCourses: CourseBasic[] = courses?.map(course => ({
+      id: course.id,
+      title: course.title,
+      slug: course.slug,
+      shortDesc: course.shortDesc,
+      price: course.price,
+      thumbnail: course.thumbnail,
+      level: course.level,
+      status: course.status,
+      instructor: Array.isArray(course.instructor) ? course.instructor[0] : course.instructor
+    })) || [];
+
+    return transformedCourses;
   } catch (error) {
     console.error("Error in getCoursesBySubcategory:", error);
     return [];

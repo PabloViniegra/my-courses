@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Lock, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { updatePassword } from "@/app/login/actions";
@@ -50,7 +49,6 @@ export function ResetPasswordForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isValidSession, setIsValidSession] = useState<boolean | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
