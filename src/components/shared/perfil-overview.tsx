@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types";
-import { ChevronDown, LogOut, Settings, User as UserIcon } from "lucide-react";
+import { ChevronDown, LogOut, Settings, User as UserIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -55,6 +55,10 @@ export function PerfilOverview({ user }: PerfilOverviewProps) {
 
   const handleSettings = () => {
     router.push("/settings");
+  };
+
+  const handleCreateCourse = () => {
+    router.push("/private/create-course");
   };
 
   const getInitials = (name: string | null) => {
@@ -142,6 +146,15 @@ export function PerfilOverview({ user }: PerfilOverviewProps) {
           <Settings className="mr-2 h-4 w-4" />
           <span className="font-serif text-xs">Settings</span>
         </DropdownMenuItem>
+        {(user.role === "ADMIN" || user.role === "TEACHER") && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleCreateCourse} className="cursor-pointer">
+              <Plus className="mr-2 h-4 w-4" />
+              <span className="font-serif text-xs">Create Course</span>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleLogout}
