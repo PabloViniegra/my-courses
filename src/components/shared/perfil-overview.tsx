@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types";
-import { ChevronDown, LogOut, Settings, User as UserIcon, Plus } from "lucide-react";
+import { ChevronDown, LogOut, Settings, User as UserIcon, Plus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { Badge } from "../ui/badge";
+import { AddProfessorModal } from "@/components/modals/add-professor-modal";
 
 interface PerfilOverviewProps {
   user: User | null;
@@ -25,6 +26,7 @@ interface PerfilOverviewProps {
 export function PerfilOverview({ user }: PerfilOverviewProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showAddProfessorModal, setShowAddProfessorModal] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -61,6 +63,14 @@ export function PerfilOverview({ user }: PerfilOverviewProps) {
     router.push("/private/create-course");
   };
 
+  const handleAddProfessor = () => {
+    setShowAddProfessorModal(true);
+  };
+
+  const handleProfessorSuccess = () => {
+    toast.success("Profesor añadido exitosamente");
+  };
+
   const getInitials = (name: string | null) => {
     if (!name) return "U";
     return name
@@ -89,7 +99,8 @@ export function PerfilOverview({ user }: PerfilOverviewProps) {
   }
 
   return (
-    <DropdownMenu>
+    <>
+      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -155,6 +166,12 @@ export function PerfilOverview({ user }: PerfilOverviewProps) {
             </DropdownMenuItem>
           </>
         )}
+        {user.role === "ADMIN" && (
+          <DropdownMenuItem onClick={handleAddProfessor} className="cursor-pointer">
+            <UserPlus className="mr-2 h-4 w-4" />
+            <span className="font-serif text-xs">Add Professor</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleLogout}
@@ -167,6 +184,14 @@ export function PerfilOverview({ user }: PerfilOverviewProps) {
           </span>
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenu>
+      
+      {/* Add Professor Modal */}
+      <AddProfessorModal
+        open={showAddProfessorModal}
+        onOpenChange={setShowAddProfessorModal}
+        onSuccess={handleProfessorSuccess}
+      />
+    </>
   );
 }

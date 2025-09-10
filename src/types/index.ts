@@ -219,6 +219,12 @@ export interface UpdateUserData {
   role?: UserRole;
 }
 
+export interface CreateProfessorData {
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
 // ===== SEARCH AND FILTER TYPES =====
 
 export interface CourseFilters {
