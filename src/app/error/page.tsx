@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { XCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function ErrorPage() {
+function ErrorPageContent() {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -74,5 +74,17 @@ export default function ErrorPage() {
         </CardContent>
       </Card>
     </section>
+  );
+}
+
+export default function ErrorPage() {
+  return (
+    <Suspense fallback={
+      <section className="flex flex-col items-center justify-center h-screen max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </section>
+    }>
+      <ErrorPageContent />
+    </Suspense>
   );
 }

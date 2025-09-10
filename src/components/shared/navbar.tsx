@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/popover";
 import { NAVIGATION_LINKS } from "@/consts";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PerfilOverview } from "@/components/shared/perfil-overview";
 import { User as LocalUser } from "@/types";
@@ -80,9 +81,9 @@ export default function Navbar({ user, localUser }: NavbarProps) {
             </PopoverContent>
           </Popover>
           <div className="flex items-center gap-6">
-            <a href="/" className="text-primary hover:text-primary/90">
+            <Link href="/" className="text-primary hover:text-primary/90">
               <Image src="/images/logo.png" alt="Logo" width={60} height={60} />
-            </a>
+            </Link>
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
                 {NAVIGATION_LINKS.map((link, index) => (

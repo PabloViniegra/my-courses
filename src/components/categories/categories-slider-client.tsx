@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, FolderOpen, BookOpen, User, DollarSign } from "lucide-react";
+import { useState, useRef } from "react";
+import { ChevronLeft, ChevronRight, FolderOpen, BookOpen } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -231,10 +232,11 @@ export function CategoriesSliderClient({
                                       <div className="flex gap-3 p-2 rounded-md hover:bg-accent/50 transition-colors">
                                         <div className="relative w-16 h-12 bg-gradient-to-br from-primary/20 to-primary/5 rounded overflow-hidden flex-shrink-0">
                                           {course.thumbnail ? (
-                                            <img
+                                            <Image
                                               src={course.thumbnail}
                                               alt={course.title}
-                                              className="w-full h-full object-cover"
+                                              fill
+                                              className="object-cover"
                                             />
                                           ) : (
                                             <div className="w-full h-full flex items-center justify-center">
