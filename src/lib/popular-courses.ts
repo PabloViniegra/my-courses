@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { CoursePublic } from "@/types";
+import { mapSupabaseCourseToPublic } from "@/utils/mappers";
 
 export async function getPopularCourses(
   limit: number = 8
@@ -43,7 +44,7 @@ export async function getPopularCourses(
 
     const coursesWithStats = await Promise.all(
       courses.map(async (course) => {
-        const [enrollments, lessons, instructor, category, subcategory] =
+        const [enrollments, , instructor, category, subcategory] =
           await Promise.all([
             supabase
               .from("enrollments")
@@ -74,58 +75,13 @@ export async function getPopularCourses(
               : null,
           ]);
 
-        return {
-          id: course.id,
-          title: course.title,
-          slug: course.slug,
-          description: course.description,
-          shortDesc: course.shortDesc,
-          thumbnail: course.thumbnail,
-          price: parseFloat(course.price?.toString() || "0"),
-          status: course.status,
-          featured: course.featured,
-          level: course.level,
-          duration: course.duration,
-          createdAt: new Date(course.createdAt),
-          publishedAt: course.publishedAt ? new Date(course.publishedAt) : null,
-          instructor: instructor.data
-            ? {
-                id: instructor.data.id,
-                name: instructor.data.name,
-                avatar: instructor.data.avatar,
-                role: instructor.data.role,
-                createdAt: new Date(instructor.data.createdAt),
-              }
-            : {
-                id: "",
-                name: "Instructor desconocido",
-                avatar: null,
-                role: "TEACHER" as const,
-                createdAt: new Date(),
-              },
-          category: category?.data
-            ? {
-                id: category.data.id,
-                name: category.data.name,
-                slug: category.data.slug,
-                description: category.data.description,
-                image: category.data.image,
-                subcategories: [],
-              }
-            : null,
-          subcategory: subcategory?.data
-            ? {
-                id: subcategory.data.id,
-                name: subcategory.data.name,
-                slug: subcategory.data.slug,
-                course_count: 0,
-              }
-            : null,
-          _count: {
-            lessons: lessons.count || 0,
-            enrollments: enrollments.count || 0,
-          },
-        } as CoursePublic;
+        return mapSupabaseCourseToPublic(
+          course,
+          instructor.data || undefined,
+          category?.data || undefined,
+          subcategory?.data || undefined,
+          { count: enrollments.count || 0 }
+        );
       })
     );
 
