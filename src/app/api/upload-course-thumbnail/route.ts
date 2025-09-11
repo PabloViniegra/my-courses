@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const fileName = `course-${user.id}-${Date.now()}.${fileExt}`;
 
     let bucketName = "course-thumbnails";
-    let { data: uploadData, error: uploadError } = await supabase.storage
+    let { error: uploadError } = await supabase.storage
       .from(bucketName)
       .upload(fileName, file, {
         cacheControl: "3600",
@@ -80,7 +80,6 @@ export async function POST(request: NextRequest) {
           cacheControl: "3600",
           upsert: false,
         });
-      uploadData = uploadResult.data;
       uploadError = uploadResult.error;
     }
 
