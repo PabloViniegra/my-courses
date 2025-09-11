@@ -32,11 +32,7 @@ const createCourseSchema = z.object({
   categoryId: z.string().min(1, "Please select a category"),
   subcategoryId: z.string().optional(),
   level: z.enum(["Beginner", "Intermediate", "Advanced"]),
-  thumbnail: z
-    .string()
-    .url("Please enter a valid URL")
-    .optional()
-    .or(z.literal("")),
+  thumbnail: z.string().optional(),
 });
 
 interface CreateCourseFormProps {
@@ -48,6 +44,8 @@ export function CreateCourseForm({ categories }: CreateCourseFormProps) {
   const [isPending, startTransition] = useTransition();
   const [publishAfterSave, setPublishAfterSave] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [thumbnailFiles, setThumbnailFiles] = useState<File[]>([]);
+  const [uploadedThumbnailUrl, setUploadedThumbnailUrl] = useState<string | null>(null);
 
   const form = useForm<CreateCourseFormData>({
     resolver: zodResolver(createCourseSchema),
@@ -64,6 +62,47 @@ export function CreateCourseForm({ categories }: CreateCourseFormProps) {
   });
 
   const watchedFields = form.watch();
+
+  const handleThumbnailUpload = async (files: File[]) => {
+    if (files.length === 0) {
+      setThumbnailFiles([]);
+      setUploadedThumbnailUrl(null);
+      form.setValue("thumbnail", "");
+      return;
+    }
+
+    const file = files[0];
+    setThumbnailFiles([file]);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload-course-thumbnail", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorResult = await response.json().catch(() => ({ error: "Error desconocido" }));
+        throw new Error(errorResult.error || "Failed to upload thumbnail");
+      }
+
+      const result = await response.json();
+      if (result.url) {
+        setUploadedThumbnailUrl(result.url);
+        form.setValue("thumbnail", result.url);
+      } else {
+        throw new Error("No se recibió URL del archivo subido");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      setThumbnailFiles([]);
+      setUploadedThumbnailUrl(null);
+      // Opcional: mostrar error al usuario de forma más amigable
+      // Por ejemplo, usando un estado de error en el componente
+    }
+  };
 
   const onSubmit = (data: CreateCourseFormData) => {
     startTransition(async () => {
@@ -107,6 +146,8 @@ export function CreateCourseForm({ categories }: CreateCourseFormProps) {
               categories={categories}
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
+              thumbnailFiles={thumbnailFiles}
+              onThumbnailUpload={handleThumbnailUpload}
             />
           </div>
 
@@ -117,6 +158,7 @@ export function CreateCourseForm({ categories }: CreateCourseFormProps) {
               isPending={isPending}
               publishAfterSave={publishAfterSave}
               watchedFields={watchedFields}
+              uploadedThumbnailUrl={uploadedThumbnailUrl}
               onSaveDraft={() => setPublishAfterSave(false)}
               onSaveAndPublish={() => setPublishAfterSave(true)}
               onCancel={() => router.back()}

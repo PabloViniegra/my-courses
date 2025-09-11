@@ -20,6 +20,7 @@ interface CoursePreviewSectionProps {
   isPending: boolean;
   publishAfterSave: boolean;
   watchedFields: CreateCourseFormData;
+  uploadedThumbnailUrl: string | null;
   onSaveDraft: () => void;
   onSaveAndPublish: () => void;
   onCancel: () => void;
@@ -30,6 +31,7 @@ export function CoursePreviewSection({
   isPending,
   publishAfterSave,
   watchedFields,
+  uploadedThumbnailUrl,
   onSaveDraft,
   onSaveAndPublish,
   onCancel,
@@ -44,22 +46,19 @@ export function CoursePreviewSection({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden">
-          {watchedFields.thumbnail ? (
+          {uploadedThumbnailUrl || watchedFields.thumbnail ? (
             <div
               className="w-full h-full bg-cover bg-center"
               style={{
-                backgroundImage: `url(${watchedFields.thumbnail})`,
+                backgroundImage: `url(${uploadedThumbnailUrl || watchedFields.thumbnail})`,
               }}
             />
-          ) : null}
-          <div
-            className={`flex flex-col items-center justify-center h-full text-primary/60 ${
-              watchedFields.thumbnail ? "hidden" : ""
-            }`}
-          >
-            <ImageIcon className="h-12 w-12 mb-2" />
-            <span className="text-sm font-medium">Course Thumbnail</span>
-          </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-primary/60">
+              <ImageIcon className="h-12 w-12 mb-2" />
+              <span className="text-sm font-medium">Course Thumbnail</span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3">

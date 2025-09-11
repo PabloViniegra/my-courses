@@ -17,6 +17,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  FileUpload,
+  FileUploadDropzone,
+  FileUploadTrigger,
+  FileUploadList,
+  FileUploadItem,
+  FileUploadItemPreview,
+  FileUploadItemMetadata,
+  FileUploadItemDelete,
+} from "@/components/ui/file-upload";
 import { Category, COURSE_LEVELS } from "@/types";
 import { CreateCourseFormData } from "@/types/forms";
 
@@ -25,6 +35,8 @@ interface CourseDetailsSectionProps {
   categories: Category[];
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
+  thumbnailFiles: File[];
+  onThumbnailUpload: (files: File[]) => void;
 }
 
 export function CourseDetailsSection({
@@ -32,6 +44,8 @@ export function CourseDetailsSection({
   categories,
   selectedCategory,
   onCategoryChange,
+  thumbnailFiles,
+  onThumbnailUpload,
 }: CourseDetailsSectionProps) {
   const selectedCategoryData = categories.find(
     (cat) => cat.id === selectedCategory
@@ -168,22 +182,48 @@ export function CourseDetailsSection({
         <FormField
           control={form.control}
           name="thumbnail"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
-              <FormLabel>Thumbnail Image URL</FormLabel>
+              <FormLabel>Course Thumbnail</FormLabel>
               <FormControl>
-                <div className="relative">
-                  <ImageIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="url"
-                    placeholder="https://example.com/image.jpg"
-                    className="pl-9"
-                    {...field}
-                  />
-                </div>
+                <FileUpload
+                  value={thumbnailFiles}
+                  onValueChange={onThumbnailUpload}
+                  onAccept={onThumbnailUpload}
+                  accept="image/*"
+                  maxFiles={1}
+                  maxSize={5 * 1024 * 1024} // 5MB
+                  className="w-full"
+                >
+                  <FileUploadDropzone className="border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors min-h-[120px]">
+                    <div className="flex flex-col items-center justify-center gap-2 p-6">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-foreground">
+                          Arrastra una imagen aquí o haz clic para seleccionar
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG, GIF, WebP (max 5MB)
+                        </p>
+                      </div>
+                      <FileUploadTrigger asChild>
+                        <span className="text-sm font-medium text-primary cursor-pointer hover:underline">
+                          Seleccionar Archivo
+                        </span>
+                      </FileUploadTrigger>
+                    </div>
+                  </FileUploadDropzone>
+                  <FileUploadList className="mt-4">
+                    <FileUploadItem value={thumbnailFiles[0]}>
+                      <FileUploadItemPreview />
+                      <FileUploadItemMetadata />
+                      <FileUploadItemDelete />
+                    </FileUploadItem>
+                  </FileUploadList>
+                </FileUpload>
               </FormControl>
               <FormDescription>
-                Optional: URL to an image that represents your course
+                Upload an image that represents your course. Max size: 5MB
               </FormDescription>
               <FormMessage />
             </FormItem>
